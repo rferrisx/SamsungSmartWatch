@@ -2,15 +2,21 @@ library(data.table)
 library(lubridate)
 fsum <- function(x) {sum(x,na.rm=TRUE)}
 
+# Download this from your Samsung Health App: Settings | Download Personal Data
+# I copy over from the phone to the PC the CSVs only. I don't use the jsons
+# There are some issues for fread(). So some hacks below in the file read:
+
 setwd("D:\\Personal\\Health\\samsunghealth_rferrisx_202102221845")
 steps <- fread("com.samsung.shealth.tracker.pedometer_day_summary.202102221845.csv")
 n1 <- names(steps)[2:20]
 steps <- setnames(steps[,1:19],n1)[]
-# distance measured in meters; convert to miles with 1mi = 1609.34 meters
+# distance measured in meters; convert to miles with 1 mi = 1609.34 meters
 steps <- steps[,.(distance=max(distance),
 miles=max(round(distance/1609.34,2)),
 step_count=max(step_count),
 calorie=(max(round(calorie))),
+# some narly work with time and date
+# maybe you have some better code:
 create_date=date(ymd_hms(create_time[1])),
 last_create_time=ymd_hms(create_time[length(create_time)]),
 last_update_time=ymd_hms(create_time[length(update_time)])),
@@ -23,10 +29,12 @@ steps[,.(miles=fsum(miles)),keyby=.(year(ymd(idate)),months(ymd(idate)),month_n=
 steps[,.(step_count=fsum(step_count)),keyby=.(year(ymd(idate)),months(ymd(idate)),month_n=month(ymd(idate)))][order(year,month_n)][,fsum(step_count)]
 steps_months[,plot(miles,type="b",pch=19,lwd=2)]
 
+# parse your months in brackets as needed
 step.summary <- cbind(steps_months[10:21],steps_count[10:21,4])
 step.summary[,.(mean.miles=mean(miles),mean.steps=mean(step_count))]
 step.summary[,.(sum.miles=fsum(miles),sum.steps=fsum(step_count))]
 
+# read in the floors data then prepare it to merge with step.summary
 # floors
 floors <- fread("com.samsung.health.floors_climbed.202102221845.csv")
 n1 <- names(floors)[2:11]
