@@ -240,11 +240,13 @@ step.miles.merge[step_count < 10000,
 	plot(step_count ~ IDate.create,type="p",cex=1,pch=19,col="black",main="Step Count Under 10000")]	
 
 
+# The 'BIG' Chart
 # start new
+dev.new()
+plot.new()
 step.miles.merge[,plot(miles~ IDate.create,type="l",col="blue",ylab="Miles and Steps",xlab="Year")];
 title(main="Miles(blue) range(0:20) and Steps/10000(red) range(0:50K) with 'lowess' approximations",line=2,cex.main=2)
 title(main="Black Diamonds < 8500 steps. Black line = 10,000 steps",line=-2,cex.main=2)
-
 step.miles.merge[,lines(step_count/10000 ~ IDate.create,col="red",lwd=3)];
 step.miles.merge[,lines(lowess(miles ~ IDate.create),col="blue",lwd=3)];
 step.miles.merge[,lines(lowess(step_count/10000 ~ IDate.create),col="red",lwd=3)];
@@ -255,6 +257,7 @@ step.miles.merge[step_count < 8500,
 abline(h=1,lwd=3,col="black")
 grid(20,lwd=1,col = "lightgray")
 # end new
+
 
 
 Under8500 <- step.miles.merge[step_count < 8500, 
@@ -308,3 +311,4 @@ daily_summary_limited[miles > 0,.(miles=sum(miles,na.rm=TRUE),step_count=sum(ste
 ,barchart( day ~ as.integer(miles)  | as.factor(month) + as.factor(year),
 horizontal=TRUE,origin=0,allow.multiple=TRUE,col=rainbow(30))]
 # End
+
