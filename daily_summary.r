@@ -307,21 +307,4 @@ daily_summary_limited[miles > 0,.(miles=sum(miles,na.rm=TRUE),step_count=sum(ste
 .(day(create_time),month(create_time),year(create_time))][
 ,barchart( day ~ as.integer(miles)  | as.factor(month) + as.factor(year),
 horizontal=TRUE,origin=0,allow.multiple=TRUE,col=rainbow(30))]
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+# End
