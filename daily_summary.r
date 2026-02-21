@@ -1,4 +1,3 @@
-# hmmm.... Updated 02/20/2026
 library(data.table)
 library(lubridate)
 library(lattice)
@@ -18,7 +17,6 @@ daily_summary[(update_time - create_time) != 0,.(create_date=as.Date(create_time
 daily_summary[(update_time - create_time) != 0,.(create_date=as.Date(create_time))][,.(last(.SD) - first(.SD))]
 daily_summary[(update_time - create_time) != 0,.N,.(create_time,create_date=as.Date(create_time))]
 daily_summary[(update_time - create_time) != 0,.(create_time),.(create_date=as.Date(create_time))][,.N,.(create_date)][N == 2,]
-
 
 daily_summary[day_time != 0,.(create_date=as.Date(create_time))][!duplicated(create_date),.(last(.SD) - first(.SD))]
 daily_summary[day_time != 0,.(create_date=as.Date(create_time))][,.(last(.SD) - first(.SD))]
@@ -327,7 +325,6 @@ dc <- daily_summary[step_count > 0 | distance > 0,
 	var.mi=var(miles))]
 
 
-
 dc <- daily_summary[step_count > 0 | distance > 0,
 	.(step_count=as.integer(step_count),miles=round(distance * 0.000621371,2)),.(year(IDate.create))]
 	dc[,.(
@@ -340,17 +337,16 @@ dc <- daily_summary[step_count > 0 | distance > 0,
 	sd.sc=sd(step_count,na.rm=TRUE),
 	sd.mi=sd(miles,na.rm=TRUE)),.(year)]
 
-
 daily_summary[,IDate.create:=as.IDate(create_time)]
 daily_summary[,IDate.update:=as.IDate(update_time)]
 daily_summary[,IDate.daytime:=as.IDate(day_time)]
 
 step.miles.merge <-
 merge(
-daily_summary[step_count > 0,.(step_count=sum(step_count,na.rm=TRUE)),.(IDate.daytime,month(day_time),year(day_time))],
+daily_summary[step_count > 0,.(step_count=sum(step_count,na.rm=TRUE)),.(IDate.create,IDate.daytime,month(day_time),year(day_time))],
 daily_summary[distance > 0,.(miles=sum(distance,na.rm=TRUE) * 0.000621371),
 .(IDate.daytime,month(day_time),year(day_time))],by=c("IDate.daytime","month","year"))[,
-.SD[,.(steps.per.miles=step_count/miles)],.(year,month,IDate.daytime,step_count,miles)][order(year,month,IDate.daytime)]
+.SD[,.(steps.per.miles=step_count/miles)],.(year,month,IDate.create,IDate.daytime,step_count,miles)][order(year,month,IDate.daytime)]
 
 
 # under 6000 steps per day
@@ -389,21 +385,25 @@ abline(h=1,lwd=3,col="black")
 grid(20,lwd=1,col = "lightgray")
 # end new
 
+
 Under8500 <- step.miles.merge[step_count < 8500, 
 	# & (month(IDate.daytime) > 2 & month(IDate.daytime) != 12),
 	.(step_count,IDate.daytime)]
 
 Under8500 <- step.miles.merge[step_count < 8500,]
 
+dev.new()
+plot.new()
 Under8500[,plot(step_count ~ IDate.create,type="p",cex=3,pch=18,col="black")];
 Under8500[,lines(lowess(step_count~ IDate.daytime),col="red",lwd=3)]
-
+dev.new()
+plot.new()
 Under8500[,plot(miles ~ IDate.create,type="p",cex=3,pch=18,col="black")];
 Under8500[,lines(lowess(miles~ IDate.daytime),col="red",lwd=3)]
-
+dev.new()
+plot.new()
 Under8500[miles < 3.5,plot(miles ~ IDate.create,type="p",cex=3,pch=18,col="black")][-c(35:47)]
 Under8500[miles < 3.5,lines(lowess(miles~ IDate.daytime),col="red",lwd=3)]
-
 
 daily_summary_limited[step_count > 0,.(step_count,year=year(ymd_hms(create_time)))]
 daily_summary_limited[step_count > 0,.(step_count,year=year(ymd_hms(update_time)))]
@@ -412,6 +412,8 @@ daily_summary_limited[step_count > 0,.(step_count,year=year(ymd(day_time)))]
 daily_summary_limited[miles > 0,.(step_count,year=year(ymd_hms(create_time)))]
 daily_summary_limited[miles > 0,.(step_count,year=year(ymd_hms(update_time)))]
 daily_summary_limited[miles > 0,.(step_count,year=year(ymd(day_time)))]
+
+
 
 ymd("2019-06-19") - ymd("2026-02-15")
 #Time difference of -2433 days
@@ -424,8 +426,6 @@ daily_summary_limited[miles > 0,.(miles=sum(miles,na.rm=TRUE),step_count=sum(ste
 
 daily_summary_limited[miles > 0,.(miles=sum(miles,na.rm=TRUE),step_count=sum(step_count,na.rm=TRUE)),
 .(day(day_time),month(day_time),year(day_time))]
-
-
 
 dev.new()
 daily_summary_limited[step_count > 0,.(miles=sum(miles,na.rm=TRUE),step_count=sum(step_count,na.rm=TRUE)),
